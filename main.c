@@ -2,6 +2,7 @@
 #include <time.h>
 
 //#define DEBUG
+//#define CHECK_RESULT_WITH_SEARCH
 //#define SHOW_USED_TIME
 
 unsigned long int calculateLCM(int max) {
@@ -139,13 +140,17 @@ int main(void) {
         }
     }
 
+    #ifdef CHECK_RESULT_WITH_SEARCH
     // find correct result by simple search and compare it
     unsigned long int check = searchForLCM(max);
 
     if (lcm != check) {
         printf("ERROR: Found incorrect result; found %ld but should be %ld\n", lcm, check);
         return 1;
+    } else {
+        printf("Searching for correct value has provided the same result :)\n");
     }
+    #endif
 
     #ifdef SHOW_USED_TIME
     showUsedTime(max);
