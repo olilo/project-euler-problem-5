@@ -81,6 +81,7 @@ BIGD calculateLCM(int max) {
     return lcm;
 }
 
+// TODO this must return a BIGD too ...
 unsigned long int searchForLCM(int max) {
     if (max == 1) {
         return 1;
@@ -187,7 +188,7 @@ int main(void) {
     printf("In decimal (%d digits):\n%s\n", decimalDigits, lcmDecimal);
 
     // check whether the result is correct
-    /*
+    /* TODO fix this check
     unsigned int n;
     for (n = 1; n <= max; n++) {
         if (lcm % n > 0) {
@@ -201,8 +202,10 @@ int main(void) {
     // find correct result by simple search and compare it
     unsigned long int check = searchForLCM(max);
 
+    // TODO fix check
     if (lcm != check) {
         printf("ERROR: Found incorrect result; found %ld but should be %ld\n", lcm, check);
+        bdFree(&lcm);
         return 1;
     } else {
         printf("Searching for correct value has provided the same result :)\n");
