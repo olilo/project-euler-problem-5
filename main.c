@@ -101,8 +101,9 @@ void showUsedTime(int max) {
     
     // used time statistic
     end_time_search = clock();
-    printf("Searching would need %ld nanoseconds\n", 
-        ((end_time_search - start_time_search) * clockMultiplier) / iterationsForSearch);
+    printf("Searching would need %ld nanoseconds, or %ld milliseconds\n",
+        ((end_time_search - start_time_search) * clockMultiplier) / iterationsForSearch,
+        ((end_time_search - start_time_search) * clockMultiplier) / 1000000 / iterationsForSearch);
 }
 
 int main(void) {
