@@ -6,40 +6,77 @@
 //#define CHECK_RESULT_WITH_SEARCH
 //#define SHOW_USED_TIME
 
-unsigned long int calculateLCM(int max) {
-    long int lcm = max;
-    unsigned int i;
-    // TODO find better names for: i and tmp
-    for (i = max - 1; i > 1; i--) {
-        if (lcm % i > 0) {
-            // copy i into new variable: tmp
-            unsigned int tmp = i;
+// IMPORTANT: the returned BIGD has to be freed outside!
+BIGD calculateLCM(int max) {
+    // create all BIGD number containers for later
+    BIGD lcm = bdNew();
+    BIGD n = bdNew();
+    BIGD primeFactor = bdNew();
+    BIGD tmp = bdNew();
+    BIGD primeRemainder = bdNew();
+    BIGD primeQuotient = bdNew();
 
-            // go through all numbers until all prime factors of i were found:
-            int primeFactor = 2;
-            while (primeFactor < tmp) {
-                if (tmp % primeFactor == 0) {
-                    tmp = tmp / primeFactor;
+    // init lcm with max, because that's a given
+    bdSetShort(lcm, max);
+
+    // iterate n from (max - 1) to 1, and multiply the lcm with n (if necessary)
+    for (bdSetShort(n, max - 1); !bdIsZero(n); bdDecrement(n)) {
+        #ifdef DEBUG
+        printf("DEBUG: Executing step ");
+        bdPrint(n, BD_PRINT_NL);
+        #endif
+        
+        // check if lcm already "contains" n
+        bdModulo(tmp, lcm, n);
+        if (!bdIsZero(tmp)) {
+            // copy n into tmp, so that we can change tmp without affecting n
+            bdSetEqual(tmp, n);
+
+            // go through all numbers until all prime factors of n were found:
+            // TODO this can be optimized to only take the prime numbers up to n
+            bdSetShort(primeFactor, 2);
+            while (bdCompare(primeFactor, tmp) == -1) {
+                bdDivide(primeQuotient, primeRemainder, tmp, primeFactor);
+                if (bdIsZero(primeRemainder)) {
+                    bdSetEqual(tmp, primeQuotient);
+
                     // if lcm is divisible by the prime factor, then divide it too
-                    if (lcm % primeFactor == 0) {
+                    bdDivide(primeQuotient, primeRemainder, lcm, primeFactor);
+                    if (bdIsZero(primeRemainder)) {
+                        // debugging (if enabled)
                         #ifdef DEBUG
-                        printf("DEBUG: step %d - Deviding %ld by prime factor %d\n", i, lcm, primeFactor);
+                        printf("DEBUG: Deviding ");
+                        bdPrint(lcm, 0);
+                        printf("by prime factor ");
+                        bdPrint(primeFactor, BD_PRINT_NL);
                         #endif
-                        lcm = lcm / primeFactor;
+
+                        // do it
+                        bdSetEqual(lcm, primeQuotient);
                     }
                 } else {
-                    primeFactor++;
+                    // this prime factor is finished: go to the next one
+                    bdIncrement(primeFactor);
                 }
             }
 
-            // finally: multiply by i
-            lcm *= i;
+            // finally: multiply by n
+            bdMultiply(tmp, n, lcm);
+            bdSetEqual(lcm, tmp);
         } else {
             #ifdef DEBUG
-            printf("DEBUG: Already divisible by %d\n", i);
+            printf("DEBUG: Already divisible by ");
+            bdPrint(n, BD_PRINT_NL);
             #endif
         }
     }
+
+    // free all temporary BIGD container (but NOT lcm)
+    bdFree(&n);
+    bdFree(&primeFactor);
+    bdFree(&tmp);
+    bdFree(&primeRemainder);
+    bdFree(&primeQuotient);
 
     return lcm;
 }
@@ -69,10 +106,24 @@ void showUsedTime(int max) {
     clock_t start_time = clock();
     clock_t end_time;
 
+    // iterations, depending on max (because granularity of CLOCKS_PER_SEC is quite variable)
+    int iterationsForCalculate;
+    if (max < 10) {
+        iterationsForCalculate = 100000;
+    } else if (max < 100) {
+        iterationsForCalculate = 10000;
+    } else if (max < 500) {
+        iterationsForCalculate = 1000;
+    } else if (max < 5000) {
+        iterationsForCalculate = 10;
+    } else {
+        iterationsForCalculate = 1;
+    }
+        
     int iter_count;
-    int iterationsForCalculate = 1000000;
-    for (iter_count = 1; iter_count < iterationsForCalculate; iter_count++) {
-        calculateLCM(max);
+    for (iter_count = 0; iter_count < iterationsForCalculate; iter_count++) {
+        BIGD ignored = calculateLCM(max);
+        bdFree(&ignored);
     }
     
     // used time statistic
@@ -121,19 +172,22 @@ int main(void) {
         printf("Sorry, only positive numbers allowed\n");
         return 2;
     }
-    if (max >= 23) {
-        printf("Sorry, this number is too high, maximum is 22; the resulting output exceeds uint ranges\n");
-        printf("Future versions will perhaps support higher numbers\n");
-        return 2;
-    }
 
     // find least common multiple
-    unsigned long int lcm = calculateLCM(max);
+    BIGD lcm = calculateLCM(max);
 
     // print result
-    printf("Least common multiple of all natural numbers in [1..%d] is %ld\n", max, lcm);
+    size_t decimalDigits = bdConvToDecimal(lcm, NULL, 0);
+    printf("Least common multiple of all natural numbers in [1..%d] ", max);
+    printf("has %d octals:\n", bdSizeof(lcm));
+    bdPrint(lcm, BD_PRINT_NL);
+    // print lcm as decimal, too
+    char lcmDecimal[decimalDigits + 1];
+    bdConvToDecimal(lcm, lcmDecimal, decimalDigits + 1);
+    printf("In decimal (%d digits):\n%s\n", decimalDigits, lcmDecimal);
 
     // check whether the result is correct
+    /*
     unsigned int n;
     for (n = 1; n <= max; n++) {
         if (lcm % n > 0) {
@@ -141,6 +195,7 @@ int main(void) {
             return 1;
         }
     }
+    */
 
     #ifdef CHECK_RESULT_WITH_SEARCH
     // find correct result by simple search and compare it
@@ -157,6 +212,8 @@ int main(void) {
     #ifdef SHOW_USED_TIME
     showUsedTime(max);
     #endif
+
+    bdFree(&lcm);
 
     // all is well, return 0
     return 0;
