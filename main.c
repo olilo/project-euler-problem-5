@@ -114,10 +114,14 @@ int main(void) {
     fgets(chars, 11, stdin);
     int max = atoi(chars);
 
+    if (max <= 0) {
+        printf("Sorry, only positive numbers allowed\n");
+        return 2;
+    }
     if (max >= 23) {
         printf("Sorry, this number is too high, maximum is 22; the resulting output exceeds uint ranges\n");
         printf("Future versions will perhaps support higher numbers\n");
-        return 1;
+        return 2;
     }
 
     // find least common multiple
