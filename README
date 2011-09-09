@@ -7,7 +7,8 @@ gcc *.c *.h
 Then run it with:
 ./a.out
 
-Enter a number between 1 and 22 and you get the result.
+Enter any number and you get the result.
+Though be careful: The calculation for 25000 lasts 1 minute ...
 
 Just to prevent questions: I did this in C to improve my skills in that language.
 I know, in most other languages (for example python) it would be loads easier and
