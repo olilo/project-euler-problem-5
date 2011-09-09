@@ -1,3 +1,6 @@
+This is a solution for the Project Euler Problem 5:
+http://projecteuler.net/index.php?section=problems&id=5
+
 Just compile it with e.g.:
 gcc main.c
 
