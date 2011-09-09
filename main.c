@@ -53,6 +53,7 @@ unsigned long int searchForLCM(int max) {
         int i;
         for (i = 2; i <= max - 2; i++) {
             found = found && (check % i == 0);
+            if (!found) break;
         }
         if (found) {
             return check;
