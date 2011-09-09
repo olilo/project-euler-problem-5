@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include "bigd.h"
 
 //#define DEBUG
 //#define CHECK_RESULT_WITH_SEARCH
