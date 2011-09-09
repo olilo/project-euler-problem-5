@@ -1,0 +1,7 @@
+Just compile it with e.g.:
+gcc main.c
+
+Then run it with:
+./a.out
+
+Enter a number between 1 and 22 and you get the result.
