@@ -103,9 +103,12 @@ unsigned long int searchForLCM(int max) {
 }
 
 void showUsedTime(int max) {
+    printf("Now testing the used time, this may take a while ...\n");
+
     // clocks for calculating used time
-    clock_t start_time = clock();
-    clock_t end_time;
+    clock_t startTime = clock();
+    clock_t endTime;
+    long int clockMultiplier = 1000000000L / CLOCKS_PER_SEC;
 
     // iterations, depending on max (because granularity of CLOCKS_PER_SEC is quite variable)
     int iterationsForCalculate;
@@ -128,37 +131,45 @@ void showUsedTime(int max) {
     }
     
     // used time statistic
-    end_time = clock();
-    long int clockMultiplier = 1000000000L / CLOCKS_PER_SEC;
-    printf("Used %ld nanoseconds\n",
-        ((end_time - start_time) * clockMultiplier) / iterationsForCalculate);
+    endTime = clock();
+    float usedClocksPerIteration = (float)(endTime - startTime) / iterationsForCalculate;
+    float usedNanoSeconds = (usedClocksPerIteration * clockMultiplier);
+    float usedMilliSeconds = ((usedClocksPerIteration / 1000000) * clockMultiplier);
+    printf("Used %.0f nanoseconds, or %.2f milliseconds\n",
+        usedNanoSeconds,
+        usedMilliSeconds);
 
     // clocks for calculating used time
-    clock_t start_time_search = clock();
-    clock_t end_time_search;
+    if (max < 23) {
+        clock_t startTimeSearch = clock();
+        clock_t endTimeSearch;
 
-    int iterationsForSearch;
-    if (max < 7) {
-        iterationsForSearch = 10000000;
-    } else if (max < 11) {
-        iterationsForSearch = 1000000;
-    } else if (max < 15) {
-        iterationsForSearch = 10000;
-    } else if (max < 19) {
-        iterationsForSearch = 100;
-    } else {
-        iterationsForSearch = 5;
-    }
+        int iterationsForSearch;
+        if (max < 7) {
+            iterationsForSearch = 10000000;
+        } else if (max < 11) {
+            iterationsForSearch = 1000000;
+        } else if (max < 15) {
+            iterationsForSearch = 10000;
+        } else if (max < 19) {
+            iterationsForSearch = 100;
+        } else {
+            iterationsForSearch = 5;
+        }
 
-    for (iter_count = 1; iter_count < iterationsForSearch; iter_count++) {
-        searchForLCM(max);
+        for (iter_count = 0; iter_count < iterationsForSearch; iter_count++) {
+            searchForLCM(max);
+        }
+        
+        // used time statistic
+        endTimeSearch = clock();
+        float usedClocksPerIterationSearch = (float)(endTimeSearch - startTimeSearch) / iterationsForSearch;
+        float usedNanoSecondsSearch = (usedClocksPerIterationSearch * clockMultiplier);
+        float usedMilliSecondsSearch = ((usedClocksPerIterationSearch / 1000000) * clockMultiplier);
+        printf("Searching would need %.0f nanoseconds, or %.2f milliseconds\n",
+            usedNanoSecondsSearch,
+            usedMilliSecondsSearch);
     }
-    
-    // used time statistic
-    end_time_search = clock();
-    printf("Searching would need %ld nanoseconds, or %ld milliseconds\n",
-        ((end_time_search - start_time_search) * clockMultiplier) / iterationsForSearch,
-        ((end_time_search - start_time_search) * clockMultiplier) / 1000000 / iterationsForSearch);
 }
 
 int main(void) {
